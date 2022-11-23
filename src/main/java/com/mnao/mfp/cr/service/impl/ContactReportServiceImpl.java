@@ -39,6 +39,7 @@ import com.mnao.mfp.cr.repository.ContactReportDealerPersonnelRepository;
 import com.mnao.mfp.cr.service.ContactReportService;
 import com.mnao.mfp.cr.service.EmailService;
 import com.mnao.mfp.cr.util.ContactReportEnum;
+import com.mnao.mfp.list.cache.ActiveReviewersCache;
 import com.mnao.mfp.list.cache.AllActiveEmployeesCache;
 import com.mnao.mfp.list.dao.ListPersonnel;
 import com.mnao.mfp.list.service.ListEmployeeDataService;
@@ -68,6 +69,9 @@ public class ContactReportServiceImpl implements ContactReportService {
 	@Autowired
 	private ListEmployeeDataService employeeDataService;
 
+	@Autowired
+	private ActiveReviewersCache activeReviewers;
+	
 	@Override
 	public List<DealersByIssue> getAllDealersByIssue() {
 		return contactInfoRepository.findAll().stream().map(contactReportInfo -> {
@@ -403,7 +407,7 @@ public class ContactReportServiceImpl implements ContactReportService {
 	public ContactReportDto findByContactReportId(long contactReportId, MFPUser mfpUser) {
 		ContactReportDto contactReportDto = new ContactReportDto();
 //		Map<String, RegionZoneReviewer> rzReviewer = new HashMap<>();
-		Map<String, RegionZoneReviewer> rzReviewer = employeeDataService.loadAllReviewer(mfpUser);
+		Map<String, RegionZoneReviewer> rzReviewer = activeReviewers.getRegionZoneReviewers(mfpUser);
 		ContactReportInfo crInfo = contactInfoRepository.findByContactReportIdAndIsActive(contactReportId,
 				IsActiveEnum.YES.getValue());
 		if (crInfo != null) {
@@ -443,7 +447,7 @@ public class ContactReportServiceImpl implements ContactReportService {
 		String userId = mfpUser.getUserid();
 		String empCd = mfpUser.getEmployeeNumber();
 		Instant start = Instant.now();
-		Map<String, RegionZoneReviewer> rzReviewer = employeeDataService.loadAllReviewer(mfpUser);
+		Map<String, RegionZoneReviewer> rzReviewer = activeReviewers.getRegionZoneReviewers(mfpUser);
 		Instant end = Instant.now();
 		Duration timeElapsed = Duration.between(start, end);
 		log.info("Reviewers loaded in " + timeElapsed.toMillis() + " ms.");

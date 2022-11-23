@@ -25,12 +25,13 @@ import com.mnao.mfp.common.util.Utils;
 import com.mnao.mfp.sync.dto.MfpSyncStatus;
 import com.mnao.mfp.sync.dto.MfpSyncStatus.SyncTypes;
 
-public class SyncDLR extends SyncBase {
+public class SyncDLR extends SyncBase implements BkgSyncProcessIntf  {
 	//
 	private static final Logger log = LoggerFactory.getLogger(SyncDLR.class);
 	//
 	private static final int ACQUIRE_LOCK_TIMEOUT = 15;
 
+	@Override
 	public void startSync() {
 		MfpSyncStatus mfpSyncStatus = new MfpSyncStatus(SyncTypes.DLRBATCH);
 		;
