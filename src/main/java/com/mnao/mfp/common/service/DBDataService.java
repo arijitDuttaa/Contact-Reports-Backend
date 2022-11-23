@@ -47,7 +47,7 @@ public class DBDataService<T extends MetricData> {
 		int st = sqlText.indexOf('{');
 		int en = sqlText.indexOf('}');
 		String ret = "";
-		if (st > 0 && en > 0) {
+		if ((st > 0) && (en > 0) && (df != null)) {
 			while (st > 0 && en > 0) {
 				String firstPart = sqlText.substring(0, st);
 				String midPart = sqlText.substring(st + 1, en);
