@@ -18,11 +18,11 @@ public interface ContactInfoRepository extends JpaRepository<ContactReportInfo, 
 
 	ContactReportInfo findByContactReportIdAndIsActive(@Param("contactReportId") long contactReportId, String isActive);
 
-	@Query(value = "SELECT new com.mnao.mfp.cr.dto.ReportByDealershipDto"
-			+ "(d.rgnCd, d.zoneCd, d.districtCd, cr.dlrCd, d.dbaNm, cr.contactReportId, cr.contactDt, cr.contactAuthor,cr.contactReviewer,cr.contactStatus,cr.currentIssues) "
-			+ "FROM Dealers d JOIN d.CRI cr WHERE cr.currentIssues IN :currentIssues AND cr.dlrCd=:dlrCd AND cr.isActive='Y'")
-	List<ReportByDealershipDto> findByDlrCd(@Param("dlrCd") String dlrCd,
-			@Param("currentIssues") List<String> currentIssues);
+//	@Query(value = "SELECT new com.mnao.mfp.cr.dto.ReportByDealershipDto"
+//			+ "(d.rgnCd, d.zoneCd, d.districtCd, cr.dlrCd, d.dbaNm, cr.contactReportId, cr.contactDt, cr.contactAuthor,cr.contactReviewer,cr.contactStatus,cr.currentIssues) "
+//			+ "FROM Dealers d JOIN d.CRI cr WHERE cr.currentIssues IN :currentIssues AND cr.dlrCd=:dlrCd AND cr.isActive='Y'")
+//	List<ReportByDealershipDto> findByDlrCd(@Param("dlrCd") String dlrCd,
+//			@Param("currentIssues") List<String> currentIssues);
 
 	@Query(value = "SELECT new com.mnao.mfp.cr.dto.ReportByDealershipDto"
 			+ "(d.rgnCd, d.zoneCd, d.districtCd, cr.dlrCd, d.dbaNm, cr.contactReportId, cr.contactDt, cr.contactAuthor,cr.contactReviewer,cr.contactStatus,cr.currentIssues) "
