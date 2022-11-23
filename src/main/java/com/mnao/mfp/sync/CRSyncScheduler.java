@@ -24,7 +24,7 @@ public class CRSyncScheduler {
 	private boolean syncOnStartup;
 	//
 	@Autowired
-	private CRSyncDealers crSync;
+	private BkgSync<SyncDLR> crSync ;// = new BkgSync<SyncDLR>(new SyncDLR());
 
 	//
 	@PostConstruct
@@ -45,7 +45,7 @@ public class CRSyncScheduler {
 
 	@Scheduled(cron = "${dlr.sync.schedule.cron}")
 	public void execDLRSync() {
-		crSync.startDealersSync();
+		crSync.startSyncProcess(new SyncDLR());
 		// Just to log when the next sync would be run.
 		showNextSyncTime();
 	}

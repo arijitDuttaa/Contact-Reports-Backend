@@ -24,6 +24,7 @@ import com.mnao.mfp.cr.repository.ContactInfoRepository;
 import com.mnao.mfp.cr.service.ContactInfoService;
 import com.mnao.mfp.cr.util.ContactReportEnum;
 import com.mnao.mfp.cr.util.DataOperationFilter;
+import com.mnao.mfp.list.cache.ActiveReviewersCache;
 import com.mnao.mfp.list.service.ListEmployeeDataService;
 import com.mnao.mfp.user.dao.MFPUser;
 
@@ -42,6 +43,9 @@ public class ContactInfoServiceImpl implements ContactInfoService {
 	@Autowired
 	private ListEmployeeDataService employeeDataService;
 
+	@Autowired
+	private ActiveReviewersCache activeReviewers;
+	
 	@Override
 	public CommonResponse<ReportByDealerShipResponse> byDealership(FilterCriteria filterCriteria) {
 		try {
@@ -75,7 +79,7 @@ public class ContactInfoServiceImpl implements ContactInfoService {
 	public ReportByDealerShipResponse byDealershipByIssues(MFPUser mfpUser, FilterCriteria filterCriteria) {
 		ReportByDealerShipResponse byDealerShipResponse = new ReportByDealerShipResponse();
 		Instant start = Instant.now();
-		Map<String, RegionZoneReviewer> rzReviewer = employeeDataService.loadAllReviewer(mfpUser);
+		Map<String, RegionZoneReviewer> rzReviewer = activeReviewers.getRegionZoneReviewers(mfpUser);
 		Instant end = Instant.now();
 		Duration timeElapsed = Duration.between(start, end);
 		log.info("Reviewers loaded in " + timeElapsed.toMillis() + " ms.");
