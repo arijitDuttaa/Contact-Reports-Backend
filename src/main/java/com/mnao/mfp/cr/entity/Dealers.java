@@ -6,7 +6,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
@@ -73,7 +72,7 @@ public class Dealers {
 //	private String DEALERSHIP_FLAG;
 //	private LocalDate W_UPDT_DT;
 	
-	@OneToMany(targetEntity = ContactReportInfo.class, cascade = CascadeType.ALL, fetch=FetchType.LAZY)
+	@OneToMany(targetEntity = ContactReportInfo.class, cascade = CascadeType.ALL)
 	@JoinColumn(name="dlrCd", updatable = false, insertable = false)
 	@NotNull
 	@JsonIgnore

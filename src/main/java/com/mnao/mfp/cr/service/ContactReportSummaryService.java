@@ -331,46 +331,46 @@ public class ContactReportSummaryService {
 
 	}
 
-//	public List<ContactReportExecutionCoverageDto> reportExecutionBycoverageBAK(String date) {
-//		LocalDate startDate;
-//		try {
-//			startDate = LocalDate.parse(date).withDayOfMonth(1);
-//		} catch (Exception e) {
-//			throw new IllegalArgumentException("The date format should be " + AppConstants.LOCALDATE_FORMAT);
-//		}
-//		LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-//
-//		List<ContactReportInfo> contactReportInfos = contactInfoRepository.findByContactDtBetweenAndIsActive(startDate,
-//				endDate, IsActiveEnum.YES.getValue());
-//
-//		Map<String, Long> reportCount = contactReportInfos.stream().map(ContactReportInfo::getDlrCd)
-//				.collect(Collectors.groupingBy(e -> e, Collectors.counting()));
-//
-//		Set<Dealers> dealers = contactReportInfos.stream().map(ContactReportInfo::getDealers)
-//				.collect(Collectors.toSet());
-//		Map<String, List<ContactReportInfo>> authorContactReports = contactReportInfos.stream()
-//				.collect(Collectors.groupingBy(ContactReportInfo::getContactAuthor));
-//		return dealers.stream()
-//				.map(dealer -> ContactReportExecutionCoverageDto.builder().dealerName(dealer.getDbaNm().trim())
-//						.dealerCode(dealer.getDlrCd().trim()).type(dealer.getCRI().get(0).getContactType())
-//						.author(dealer.getCRI().get(0).getContactAuthor())
-//						.coverage(getCoverage(dealer.getCRI().get(0).getContactType()))
-//						.reportCount(reportCount.get(dealer.getDlrCd()))
-//						.authorDtos(dealer.getCRI().stream().map(contactReportInfo -> {
-//							List<ContactReportInfo> lists = authorContactReports
-//									.get(contactReportInfo.getContactAuthor());
-//							Function<String, Boolean> isExist = issueTopic -> lists.stream().anyMatch(
-//									l -> l.getDiscussions().stream().anyMatch(x -> x.getTopic().equals(issueTopic)));
-//							return ContactReportExecutionCoverageAuthorDto.builder()
-//									.author(contactReportInfo.getContactAuthor())
-//									.isDealerDefeciencyIdentified(isExist.apply("Dealer Dev Deficiencies Identifed"))
-//									.isServiceRetentionFysl(isExist.apply("Service Retention/FYSL"))
-//									.reportsCreatedByAuthor(lists.size()).build();
-//						}
-//
-//						).collect(Collectors.toList())).build()).collect(Collectors.toList());
-//
-//	}
+	public List<ContactReportExecutionCoverageDto> reportExecutionBycoverageBAK(String date) {
+		LocalDate startDate;
+		try {
+			startDate = LocalDate.parse(date).withDayOfMonth(1);
+		} catch (Exception e) {
+			throw new IllegalArgumentException("The date format should be " + AppConstants.LOCALDATE_FORMAT);
+		}
+		LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+		List<ContactReportInfo> contactReportInfos = contactInfoRepository.findByContactDtBetweenAndIsActive(startDate,
+				endDate, IsActiveEnum.YES.getValue());
+
+		Map<String, Long> reportCount = contactReportInfos.stream().map(ContactReportInfo::getDlrCd)
+				.collect(Collectors.groupingBy(e -> e, Collectors.counting()));
+
+		Set<Dealers> dealers = contactReportInfos.stream().map(ContactReportInfo::getDealers)
+				.collect(Collectors.toSet());
+		Map<String, List<ContactReportInfo>> authorContactReports = contactReportInfos.stream()
+				.collect(Collectors.groupingBy(ContactReportInfo::getContactAuthor));
+		return dealers.stream()
+				.map(dealer -> ContactReportExecutionCoverageDto.builder().dealerName(dealer.getDbaNm().trim())
+						.dealerCode(dealer.getDlrCd().trim()).type(dealer.getCRI().get(0).getContactType())
+						.author(dealer.getCRI().get(0).getContactAuthor())
+						.coverage(getCoverage(dealer.getCRI().get(0).getContactType()))
+						.reportCount(reportCount.get(dealer.getDlrCd()))
+						.authorDtos(dealer.getCRI().stream().map(contactReportInfo -> {
+							List<ContactReportInfo> lists = authorContactReports
+									.get(contactReportInfo.getContactAuthor());
+							Function<String, Boolean> isExist = issueTopic -> lists.stream().anyMatch(
+									l -> l.getDiscussions().stream().anyMatch(x -> x.getTopic().equals(issueTopic)));
+							return ContactReportExecutionCoverageAuthorDto.builder()
+									.author(contactReportInfo.getContactAuthor())
+									.isDealerDefeciencyIdentified(isExist.apply("Dealer Dev Deficiencies Identifed"))
+									.isServiceRetentionFysl(isExist.apply("Service Retention/FYSL"))
+									.reportsCreatedByAuthor(lists.size()).build();
+						}
+
+						).collect(Collectors.toList())).build()).collect(Collectors.toList());
+
+	}
 
 	private String getCoverage(String contactType) {
 		if (contactType.equalsIgnoreCase("Sales | Service") || contactType.equalsIgnoreCase("Sales | Service | Other"))
