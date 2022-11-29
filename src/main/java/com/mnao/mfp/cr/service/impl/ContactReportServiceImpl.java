@@ -88,7 +88,7 @@ public class ContactReportServiceImpl implements ContactReportService {
 	 */
 	@Override
 	public String submitReportDataV2(ContactReportInfoDto reportDto, MFPUser mfpUser, String currURL) throws Exception {
-		String submission = "Unable to save contact report";
+		String submission = "";
 		if (reportDto == null)
 			throw new AssertionError();
 		int origCRStatus = -1;
@@ -219,7 +219,7 @@ public class ContactReportServiceImpl implements ContactReportService {
 			}
 		} catch (Exception e) {
 			log.error("", e);
-			submission = "Failed to save Contact Report.";
+			submission += " Failed to save Contact Report.";
 			throw new Exception(submission);
 		}
 		return submission;
