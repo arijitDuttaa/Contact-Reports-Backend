@@ -139,7 +139,7 @@ public class ListEmployeeDataService extends MfpKPIControllerBase {
 			isCurrent = false;
 			ContactReportInfo reportDb = contactInfoRepository.getById(id);
 			String corps = reportDb.getCorporateReps();
-			List<String> ids = Arrays.asList(corps.split("[|]"));
+			List<String> ids = Arrays.asList(corps.split("[|,]"));
 			String sqlName = getKPIQueryFilePath(AppConstants.SQL_LIST_ALL_EMPLOYEES);
 			retRows = service.getEmpDataAllEmployees(sqlName, ListPersonnel.class, "A.PRSN_ID_CD", ids);
 		}
@@ -177,7 +177,7 @@ public class ListEmployeeDataService extends MfpKPIControllerBase {
 				isCurrent = true;
 			} else {
 				String corps = reportDb.getCorporateReps();
-				List<String> ids = Arrays.asList(corps.split("[|]"));
+				List<String> ids = Arrays.asList(corps.split("[|,]"));
 				String sqlName = getKPIQueryFilePath(AppConstants.SQL_LIST_ALL_EMPLOYEES);
 				retRows = service.getEmpDataAllEmployees(sqlName, ListPersonnel.class, "A.PRSN_ID_CD", ids);
 			}
