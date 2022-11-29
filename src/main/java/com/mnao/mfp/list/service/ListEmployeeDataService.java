@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,9 +24,9 @@ import com.mnao.mfp.cr.dto.RegionZoneReviewer;
 import com.mnao.mfp.cr.entity.ContactReportInfo;
 import com.mnao.mfp.cr.repository.ContactInfoRepository;
 import com.mnao.mfp.cr.util.ContactReportEnum;
+import com.mnao.mfp.list.cache.ActiveReviewersCache;
 import com.mnao.mfp.list.cache.AllActiveEmployeesCache;
 import com.mnao.mfp.list.cache.AllDealersCache;
-import com.mnao.mfp.list.cache.CheckDealerChanges;
 import com.mnao.mfp.list.cache.CheckEmployeeChanges;
 import com.mnao.mfp.list.dao.ListPersonnel;
 import com.mnao.mfp.user.dao.MFPUser;
@@ -39,15 +38,15 @@ public class ListEmployeeDataService extends MfpKPIControllerBase {
 	private static final Logger log = LoggerFactory.getLogger(ListEmployeeDataService.class);
 	//
 	@Autowired
-	AllActiveEmployeesCache allEmployeesCache;
+	private AllActiveEmployeesCache allEmployeesCache;
 	@Autowired
-	AllDealersCache allDealersCache;
+	private AllDealersCache allDealersCache;
 	@Autowired
-	CheckEmployeeChanges checkEmployeeChanges;
-	@Autowired
-	CheckDealerChanges checkDealerChanges;
+	private CheckEmployeeChanges checkEmployeeChanges;
 	@Autowired
 	private ContactInfoRepository contactInfoRepository;
+	@Autowired
+	private ActiveReviewersCache activeReviewers;
 
 	public List<ListPersonnel> getListOfReviewers(String dlrCd, Long contactReportId, MFPUser mfpUser, String rgnCd,
 			String zoneCd, String districtCd, String mdaCd) {
@@ -140,7 +139,7 @@ public class ListEmployeeDataService extends MfpKPIControllerBase {
 			isCurrent = false;
 			ContactReportInfo reportDb = contactInfoRepository.getById(id);
 			String corps = reportDb.getCorporateReps();
-			List<String> ids = Arrays.asList(corps.split("[|]"));
+			List<String> ids = Arrays.asList(corps.split("[|,]"));
 			String sqlName = getKPIQueryFilePath(AppConstants.SQL_LIST_ALL_EMPLOYEES);
 			retRows = service.getEmpDataAllEmployees(sqlName, ListPersonnel.class, "A.PRSN_ID_CD", ids);
 		}
@@ -178,7 +177,7 @@ public class ListEmployeeDataService extends MfpKPIControllerBase {
 				isCurrent = true;
 			} else {
 				String corps = reportDb.getCorporateReps();
-				List<String> ids = Arrays.asList(corps.split("[|]"));
+				List<String> ids = Arrays.asList(corps.split("[|,]"));
 				String sqlName = getKPIQueryFilePath(AppConstants.SQL_LIST_ALL_EMPLOYEES);
 				retRows = service.getEmpDataAllEmployees(sqlName, ListPersonnel.class, "A.PRSN_ID_CD", ids);
 			}
@@ -207,19 +206,6 @@ public class ListEmployeeDataService extends MfpKPIControllerBase {
 				log.error("ERROR retrieving list of Employees:", e);
 			}
 			checkEmployeeChanges.checkEmpChanges(retRows);
-		}
-		return retRows;
-	}
-
-	public List<ListPersonnel> getListOfAllReviewers(MFPUser mfpUser) {
-		MMAListService<ListPersonnel> service = new MMAListService<ListPersonnel>();
-		String sqlName = getKPIQueryFilePath(AppConstants.SQL_LIST_REVIEWER_EMPLOYEES_ALL);
-		DealerFilter df = new DealerFilter(mfpUser, null, null, null, null, null);
-		List<ListPersonnel> retRows = null;
-		try {
-			retRows = service.getListData(sqlName, ListPersonnel.class, df);
-		} catch (InstantiationException | IllegalAccessException | ParseException e) {
-			log.error("ERROR retrieving list of ALL Reviewers:", e);
 		}
 		return retRows;
 	}
@@ -260,22 +246,5 @@ public class ListEmployeeDataService extends MfpKPIControllerBase {
 		return matched;
 	}
 
-	public Map<String, RegionZoneReviewer> loadAllReviewer(MFPUser mfpUser) {
-		Map<String, RegionZoneReviewer> allReviewers = new HashMap<>();
-		List<ListPersonnel> reviewers = getListOfAllReviewers(mfpUser);
-		for (ListPersonnel lp : reviewers) {
-			RegionZoneReviewer rzr = new RegionZoneReviewer(lp.getRgnCd(), lp.getZoneCd(), null);
-			RegionZoneReviewer allRrzr = allReviewers.get(rzr.getRegionZone());
-			if (allRrzr != null) {
-				allRrzr.getReviewers().add(lp);
-			} else {
-				List<ListPersonnel> lstRzr = new ArrayList<>();
-				lstRzr.add(lp);
-				rzr = new RegionZoneReviewer(lp.getRgnCd(), lp.getZoneCd(), lstRzr);
-				allReviewers.put(rzr.getRegionZone(), rzr);
-			}
-		}
-		return allReviewers;
-	}
 
 }
