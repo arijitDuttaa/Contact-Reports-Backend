@@ -3,6 +3,8 @@ package com.mnao.mfp.list.service;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,29 +38,38 @@ public class MMAListService<T extends MetricData> extends DBDataService<T> {
 
 	public List<T> getEmpDataAllEmployees(String sqlFile, Class<T> tclass, String idColumn, List<String> idCdList) {
 		List<T> retRows = new ArrayList<T>();
-		String sqlText = Utils.readTextFromFile(sqlFile);
-		String sql = buildInClause(sqlText, idColumn, idCdList);
-		MFPDatabase db = new MFPDatabase(DB.mma);
-		try (Connection conn = db.getConnection()) {
-			sql = Utils.replaceSchemaName(conn, sql);
-			retRows = super.getResultList(conn, sql, tclass, idCdList.toArray(new String[0]));
-		} catch (SQLException e) {
-			log.error("Error connecting do DB: ", e);
+		if ((idCdList != null) && idCdList.size() > 0) {
+			String sqlText = Utils.readTextFromFile(sqlFile);
+			String sql = buildInClause(sqlText, idColumn, idCdList);
+			MFPDatabase db = new MFPDatabase(DB.mma);
+			try (Connection conn = db.getConnection()) {
+				sql = Utils.replaceSchemaName(conn, sql);
+				Instant st = Instant.now();
+				retRows = super.getResultList(conn, sql, tclass, idCdList.toArray(new String[0]));
+				log.info("Returning {} rows in {} ms.", retRows.size(), Duration.between(st, Instant.now()).toMillis());
+			} catch (SQLException e) {
+				log.error("Error connecting do DB: ", e);
+			}
 		}
 		return retRows;
 	}
 
 	private String buildInClause(String sqlText, String idCol, List<String> idCdList) {
 		StringBuilder sb = new StringBuilder(sqlText.trim());
-		if( idCdList != null && idCdList.size() > 0 ) {
-			sb.append(" WHERE " + idCol + " IN (");
-			for( int i = 0 ; i < idCdList.size(); i++ ) {
-				if( i > 0 ) {
-					sb.append(", ");
+		if (idCdList != null && idCdList.size() > 0) {
+			sb.append(" WHERE " + idCol);
+			if (idCdList.size() > 1) {
+				sb.append(" IN (");
+				for (int i = 0; i < idCdList.size(); i++) {
+					if (i > 0) {
+						sb.append(", ");
+					}
+					sb.append("?");
 				}
-				sb.append("?");
+				sb.append(")");
+			} else {
+				sb.append(" = ?");
 			}
-			sb.append(")");
 		}
 		return sb.toString();
 	}
