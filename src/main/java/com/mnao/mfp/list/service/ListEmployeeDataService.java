@@ -184,7 +184,7 @@ public class ListEmployeeDataService extends MfpKPIControllerBase {
 		}
 		if (isCurrent) {
 			DealerFilter df = new DealerFilter(mfpUser, dlrCd, rgnCd, zoneCd, districtCd, mdaCd);
-			if (contactDateStr != null) {
+			if ((contactDateStr != null) && contactDateStr.trim().length() > 0) {
 				crDate = LocalDate.parse(contactDateStr.trim(),
 						DateTimeFormatter.ofPattern(AppConstants.LOCALDATE_FORMAT));
 			}
