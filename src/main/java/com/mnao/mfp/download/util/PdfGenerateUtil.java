@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.mnao.mfp.common.util.NullCheck;
 import com.mnao.mfp.common.util.Utils;
+import com.mnao.mfp.cr.entity.ContactReportDealerPersonnel;
 import com.mnao.mfp.cr.entity.ContactReportDiscussion;
 import com.mnao.mfp.cr.entity.ContactReportInfo;
 import com.mnao.mfp.cr.entity.Dealers;
@@ -250,8 +251,7 @@ public class PdfGenerateUtil {
 			+ "      <div><span>Comment :</span>  __________________________________________________________________________________________________________________________________</div>\r\n"
 			+ "      <div style=\"text-align: right;\">Contact Form</div>\r\n"
 //			+ "      <div style=\"text-align: right;\">Toll-Free Helpline: </div>\r\n" 
-			+ "    </div>\r\n"
-			+ "    </div>\r\n" + "\r\n" + "</body>\r\n" + "\r\n" + "</html>";
+			+ "    </div>\r\n" + "    </div>\r\n" + "\r\n" + "</body>\r\n" + "\r\n" + "</html>";
 
 	private final String DISCUSSION = "                      <tr>\r\n"
 			+ "                        <td>%DISC_TYPE%</td>\r\n"
@@ -264,8 +264,11 @@ public class PdfGenerateUtil {
 		contactReports.forEach(cr -> {
 			log.debug("" + currentPageNumber.get());
 			Dealers dealers = new NullCheck<>(cr).with(ContactReportInfo::getDealers).orElse(new Dealers());
-			List<ListPersonnel> dps = pdfService.getDealerEmployeeInfos(mfpUser, cr.getDlrCd(),
-					cr.getDealerPersonnels());
+			List<ContactReportDealerPersonnel> dPers = cr.getDealerPersonnels().stream()
+					.filter(dp -> dp.getPersonnelId() != -9999999L).collect(Collectors.toList());
+			String addPersonnel = cr.getDealerPersonnels().stream().filter(dp -> dp.getPersonnelId() == -9999999L)
+					.map(ContactReportDealerPersonnel::getPersonnelIdCd).collect(Collectors.joining("|"));
+			List<ListPersonnel> dps = pdfService.getDealerEmployeeInfos(mfpUser, cr.getDlrCd(), dPers);
 			ListPersonnel rvr = allEmpCache.getByPrsnIdCd(cr.getContactReviewer());
 			String corpsStr = cr.getCorporateReps();
 			List<String> corpPersons = new ArrayList<>();
@@ -306,10 +309,12 @@ public class PdfGenerateUtil {
 			String dealerPersonnel = dps.stream()
 					.map(data -> Utils.getNameString(data.getFirstNm(), data.getMidlNm(), data.getLastNm()))
 					.collect(Collectors.joining("<br>"));
-			if (cr.getAddDealerPersonnel() != null && cr.getAddDealerPersonnel().trim().length() > 0) {
-				List<String> addDps = Arrays.asList(cr.getAddDealerPersonnel().split("[,;]"));
+			if (addPersonnel != null && addPersonnel.trim().length() > 0) {
+				List<String> addDps = Arrays.asList(addPersonnel.split("[,;|]"));
 				String strAddDps = addDps.stream().collect(Collectors.joining("<br>"));
-				dealerPersonnel += "<br>" + strAddDps;
+				if( (dealerPersonnel != null) && (dealerPersonnel.trim().length() > 0))
+					dealerPersonnel += "<br>";
+				dealerPersonnel += strAddDps;
 			}
 			String updateHtml4 = updatedHtml
 					.replace("%DLR_AUTHOR%", new NullCheck<>(getAuthorUser(mfpUser, cr.getContactAuthor())).orElse(""))
